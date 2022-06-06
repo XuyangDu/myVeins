@@ -108,9 +108,9 @@ void PhyIRS::handleSelfMessage(cMessage* msg) {
         Coord receiverPos = cc->getNicPos(irsInfo.getDestAddr());
 
         simtime_t propagationDelay = receiverPos.distance(senderPos) / BaseWorldUtility::speedOfLight();
-
+        cPacket* msg0 = frameToSend;
         for (int gateIndex = gate->getBaseId(); gateIndex < gate->getBaseId() + gate->size(); gateIndex++) {
-            sendDirect(frameToSend->dup(), propagationDelay, frameToSend->getDuration(), gate->getOwnerModule(), gateIndex);
+            sendDirect(msg0->dup(), propagationDelay, msg0->getDuration(), gate->getOwnerModule(), gateIndex);
         }
     }
     // Original message no longer needed, copies have been sent to all possible receivers.

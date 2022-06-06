@@ -641,7 +641,7 @@ void BasePhyLayer::sendMessageDown(AirFrame* msg)
     int irsId;
     irsId = msg->getIrsInfo().getIRSIndex();
     if (irsId < 0) {
-        sendToChannel(msg);
+    sendToChannel(msg);
     }
     else {
         PhyIRS* phyirs = dynamic_cast<PhyIRS* >(getParentModule()->getParentModule()->getParentModule()->getSubmodule("irs",irsId)->getSubmodule("phy"));
@@ -652,8 +652,9 @@ void BasePhyLayer::sendMessageDown(AirFrame* msg)
 
         // this time-point is used to calculate the distance between sending and receiving host
         simtime_t propagationDelay = receiverPos.distance(senderPos) / BaseWorldUtility::speedOfLight();
+        cPacket* msg0 = msg;
         for (int gateIndex = gate->getBaseId(); gateIndex < gate->getBaseId() + gate->size(); gateIndex++) {
-            sendDirect(msg->dup(), propagationDelay, msg->getDuration(), gate->getOwnerModule(), gateIndex);
+            sendDirect(msg0->dup(), propagationDelay, msg0->getDuration(), gate->getOwnerModule(), gateIndex);
         }
         delete msg;
     }

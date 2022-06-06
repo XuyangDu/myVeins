@@ -129,7 +129,41 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
 
                         EV <<" sending from Node " << getParentModule()->getIndex() << " to Node "<< imod << std::endl;
 
-                        IRSInfo irsInfo = IRSInfo(myId, rcvId);
+                        Coord srcPos = mobSrc->getPositionAt(simTime());
+                        int irsId_0;
+                        if(getParentModule()->getIndex()%4==0) {
+                            if(srcPos.x<125){
+                                irsId_0 = 2;
+                            }
+                            else{
+                                irsId_0 = 3;
+                            }
+                        }
+                        if(getParentModule()->getIndex()%4==1) {
+                            if(srcPos.x>125){
+                                irsId_0 = 1;
+                            }
+                            else{
+                                irsId_0 = 0;
+                            }
+                        }
+                        if(getParentModule()->getIndex()%4==2) {
+                            if(srcPos.y>125){
+                                irsId_0 = 3;
+                            }
+                            else{
+                                irsId_0 = 1;
+                            }
+                        }
+                        if(getParentModule()->getIndex()%4==3) {
+                            if(srcPos.y<125){
+                                irsId_0 = 0;
+                            }
+                            else{
+                                irsId_0 = 2;
+                            }
+                        }
+                        IRSInfo irsInfo = IRSInfo(myId, rcvId, irsId_0);
 
                         TraCIDemo11pMessage* wsm = new TraCIDemo11pMessage();
                         wsm->setSenderAddress(myId);

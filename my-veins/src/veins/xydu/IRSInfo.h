@@ -32,10 +32,10 @@ public:
         , IRSNum(0)
         {
         }
-    IRSInfo(const LAddress::L2Type Addr1, const LAddress::L2Type Addr2)
+    IRSInfo(const LAddress::L2Type Addr1, const LAddress::L2Type Addr2, int id)
         : srcAddr(Addr1)
         , destAddr(Addr2)
-        , IRSIndex(1)
+        , IRSIndex(id)
         , IRSNum(0)
         {
         }

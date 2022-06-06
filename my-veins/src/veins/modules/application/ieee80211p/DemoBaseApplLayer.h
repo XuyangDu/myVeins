@@ -79,7 +79,7 @@ protected:
     void handleSelfMsg(cMessage* msg) override;
 
     /** @brief sets all the necessary fields in the WSM, BSM, or WSA. */
-    virtual void populateWSM(BaseFrame1609_4* wsm, LAddress::L2Type rcvId = LAddress::L2BROADCAST(), IRSInfo irsInfo = IRSInfo(-1,-1), int serial = 0);
+    virtual void populateWSM(BaseFrame1609_4* wsm, LAddress::L2Type rcvId = LAddress::L2BROADCAST(), IRSInfo irsInfo = IRSInfo(-1,-1, 0), int serial = 0);
 
     /** @brief this function is called upon receiving a BaseFrame1609_4 */
     virtual void onWSM(BaseFrame1609_4* wsm){};
