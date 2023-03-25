@@ -71,7 +71,7 @@ void ChannelAccess::initialize(int stage)
 
         findHost()->subscribe(BaseMobility::mobilityStateChangedSignal, this);
 
-        if (getParentModule()->getVectorSize() == 4) {
+        if (getParentModule()->getVectorSize() > 1) {
 
             cc = dynamic_cast<BaseConnectionManager*>(getParentModule()->getParentModule()->getSubmodule("connectionManager"));
         }

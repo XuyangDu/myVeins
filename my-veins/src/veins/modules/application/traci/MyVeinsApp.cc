@@ -24,11 +24,35 @@
 #include "veins/modules/application/traci/TraCIDemo11pMessage_m.h"
 #include "veins/base/phyLayer/MacToPhyInterface.h"
 #include "veins/base/utils/Heading.h"
-#include "veins/xydu/IRSInfo.h"
+
 
 using namespace veins;
 
 Define_Module(veins::MyVeinsApp);
+
+int MyVeinsApp::getLastNode(int node) {
+    if(node < 240)
+    {
+        return -1;
+    }
+    cModule *simMod = getParentModule()->getParentModule();
+    Coord nodePos = cc->getNicPos(simMod->getSubmodule("node", node)->getSubmodule("nic")->getId());
+    int y = (node / 24 - 1) * 24;
+    for(int i = 0; i < 24; i++) {
+        if(irsCtrl->used[i])
+        {
+            continue;
+        }
+        int iId = y + i;
+        Coord iPos = cc->getNicPos(simMod->getSubmodule("node", iId)->getSubmodule("nic")->getId());
+        if(nodePos.distance(iPos) > 500)
+        {
+            irsCtrl->used[i] = true;
+            return iId;
+        }
+    }
+    return -1;
+}
 
 void MyVeinsApp::initialize(int stage)
 {
@@ -40,25 +64,27 @@ void MyVeinsApp::initialize(int stage)
     else if (stage == 1) {
         // Initializing members that require initialized other modules goes here
         // Application layer data generation
-        sendRate = par("sendRate").doubleValue();
-        if (dblrand() < sendRate) {
-            sendWSMEvt = new cMessage("wsm evt", SEND_WSM_EVT);
-            sendInterval = par("sendInterval").doubleValue();
-            scheduleAt(simTime()+0.5, sendWSMEvt);
-        }
+        task = Task();
+        irsCtrl = dynamic_cast<IRSctrl*>(getParentModule()->getParentModule()->getSubmodule("ctrl"));
+        cc = dynamic_cast<BaseConnectionManager*>(getParentModule()->getParentModule()->getSubmodule("connectionManager"));
+        hopsCount = 0;
+        countTask = 0;
+        genTaskEvt = new cMessage("gen task evt", GEN_TASK_EVT);
+        sendWSMEvt = new cMessage("wsm evt", SEND_WSM_EVT);
+        scheduleAt(simTime() + 1e-6, genTaskEvt);
     }
+}
+
+void MyVeinsApp::setTask(Task task_) {
+    task = task_;
+    scheduleAt(simTime() + 1e-6, sendWSMEvt);
 }
 
 void MyVeinsApp::finish()
 {
+    recordScalar("hopsCount", hopsCount);
     DemoBaseApplLayer::finish();
     // statistics recording goes here
-}
-
-void MyVeinsApp::onBSM(DemoSafetyMessage* bsm)
-{
-    // Your application has received a beacon message from another car or RSU
-    // code for handling the message goes here
 }
 
 void MyVeinsApp::onWSM(BaseFrame1609_4* wsm)
@@ -67,16 +93,20 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* wsm)
     // code for handling the message goes here, see TraciDemo11p.cc for examples
     TraCIDemo11pMessage* wsm0 = check_and_cast<TraCIDemo11pMessage*>(wsm);
     if (getSimulation()->getModule(wsm0->getSenderAddress())) {
+        IRSInfo irsInfo = wsm0->getIrsInfo();
+        int nodeId = getParentModule()->getIndex();
+        if(irsInfo.getlastNode() == nodeId) {
+            hopsCount = irsInfo.gethop();
+            irsCtrl->hopsCount += irsInfo.gethop();
+            irsCtrl->receivedPackets++;
+        }
+        else {
+            task = Task(nodeId, -1, irsInfo.getlastNode(), -1, irsInfo.gethop() + 1);
+            irsCtrl->addTask(task);
+        }
         EV << "Node "<< getParentModule()->getIndex() << " successfully received data from Node " << getSimulation()->getModule(wsm0->getSenderAddress())->getParentModule()->getIndex() << std::endl;
     }
 }
-
-void MyVeinsApp::onWSA(DemoServiceAdvertisment* wsa)
-{
-    // Your application has received a service advertisement from another car or RSU
-    // code for handling the message goes here, see TraciDemo11p.cc for examples
-}
-
 
 void MyVeinsApp::handleSelfMsg(cMessage* msg)
 {
@@ -84,97 +114,48 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
     // it is important to call the DemoBaseApplLayer function for BSM and WSM transmission
     // DemoBaseApplLayer::handleSelfMsg(msg);
     if (msg->getKind() == SEND_WSM_EVT) {
-        // Randomly select a vehicle as the recipient
-        cModule *mod = getParentModule()->getParentModule();
-        int i, nodeMax = 0;
-        for(i=getParentModule()->getIndex();i<=150;i++) {
-            if (mod->getSubmodule("node", i)) {
-                nodeMax = i;
-            }
-        }
-        int rand = intrand(nodeMax);
-        // Get a rcvId that different with src in heading to send
-
-        TraCIMobility* mobSrc = dynamic_cast<TraCIMobility*>(getParentModule()->getSubmodule("veinsmobility"));
-        Heading headSrc = mobSrc->getHeading();
-
         MacToPhyInterface* phySrc;
         phySrc = FindModule<MacToPhyInterface*>::findSubModule(getParentModule()->getSubmodule("nic"));
 
-        if (phySrc->getRadioState() == Radio::SLEEP) {
-            LAddress::L2Type rcvId;
-            int i, imod;
-            for(i=rand;i<rand+nodeMax;i++) {
-                if (i>=nodeMax)
-                    imod = i - nodeMax;
-                else
-                    imod = i;
-                if(mod->getSubmodule("node", imod) and imod != getParentModule()->getIndex()) {
-                    TraCIMobility* mobDest = dynamic_cast<TraCIMobility*>(mod->getSubmodule("node", imod)->getSubmodule("veinsmobility"));
-                    Heading headDest = mobDest->getHeading();
+        int nodeId = getParentModule()->getIndex();
 
-                    MacToPhyInterface* phyDest;
-                    phyDest = FindModule<MacToPhyInterface*>::findSubModule(mod->getSubmodule("node", imod)->getSubmodule("nic"));
+        cModule *simMod = getParentModule()->getParentModule();
+        MacToPhyInterface* phyDest;
+        phyDest = FindModule<MacToPhyInterface*>::findSubModule(simMod->getSubmodule("node", task.desNode)->getSubmodule("nic"));
 
-                    if(phyDest->getRadioState() == Radio::SLEEP and fabs(headSrc.toCoord() * headDest.toCoord()) < 1e-6) {
-                        rcvId = mod->getSubmodule("node", imod)->getSubmodule("nic")->getId();
+        EV << "TX_BEGIN Node " << nodeId << " change from " << phySrc->getRadioState() << " to ";
+        phySrc->setRadioState(Radio::TX);
+        EV << phySrc->getRadioState() << std::endl;
 
-                        EV << "TX_BEGIN Node " << getParentModule()->getIndex() << " change from " << phySrc->getRadioState() << " to ";
-                        phySrc->setRadioState(Radio::TX);
-                        EV << phySrc->getRadioState() << std::endl;
+        EV << "RX_BEGIN Node " << task.desNode << " change from " << phyDest->getRadioState() << " to ";
+        phyDest->setRadioState(Radio::RX);
+        EV << phyDest->getRadioState() << std::endl;
 
-                        EV << "RX_BEGIN Node " << imod << " change from " << phyDest->getRadioState() << " to ";
-                        phyDest->setRadioState(Radio::RX);
-                        EV << phyDest->getRadioState() << std::endl;
+        EV << "hop " << task.hop << ": sending from Node " << nodeId << " to Node "<< task.desNode << " final destination is Node " << task.lastNode << std::endl;
 
-                        EV <<" sending from Node " << getParentModule()->getIndex() << " to Node "<< imod << std::endl;
+        LAddress::L2Type rcvId;
+        rcvId = simMod->getSubmodule("node", task.desNode)->getSubmodule("nic")->getId();
+        IRSInfo irsInfo = IRSInfo(myId, rcvId, task.IRSIndex, task.lastNode, task.hop);
+        TraCIDemo11pMessage* wsm = new TraCIDemo11pMessage();
+        wsm->setSenderAddress(myId);
+        populateWSM(wsm, rcvId, irsInfo);
+        sendDown(wsm);
+    }
+    else if (msg->getKind() == GEN_TASK_EVT) {
+        int nodeId = getParentModule()->getIndex();
+        int last = getLastNode(nodeId);
+        if(last != -1)
+        {
+            task = Task(nodeId, -1, last, -1, 1);
+            cModule *simMod = getParentModule()->getParentModule();
+            irsCtrl->addTask(task);
+            irsCtrl->generatedPackets++;
 
-                        Coord srcPos = mobSrc->getPositionAt(simTime());
-                        int irsId_0;
-                        if(getParentModule()->getIndex()%4==0) {
-                            if(srcPos.x<125){
-                                irsId_0 = 2;
-                            }
-                            else{
-                                irsId_0 = 3;
-                            }
-                        }
-                        if(getParentModule()->getIndex()%4==1) {
-                            if(srcPos.x>125){
-                                irsId_0 = 1;
-                            }
-                            else{
-                                irsId_0 = 0;
-                            }
-                        }
-                        if(getParentModule()->getIndex()%4==2) {
-                            if(srcPos.y>125){
-                                irsId_0 = 3;
-                            }
-                            else{
-                                irsId_0 = 1;
-                            }
-                        }
-                        if(getParentModule()->getIndex()%4==3) {
-                            if(srcPos.y<125){
-                                irsId_0 = 0;
-                            }
-                            else{
-                                irsId_0 = 2;
-                            }
-                        }
-                        IRSInfo irsInfo = IRSInfo(myId, rcvId, irsId_0);
-
-                        TraCIDemo11pMessage* wsm = new TraCIDemo11pMessage();
-                        wsm->setSenderAddress(myId);
-                        populateWSM(wsm, rcvId, irsInfo);
-                        sendDown(wsm);
-                        break;
-                    }
-                }
+            countTask++;
+            if(countTask < 1) {
+                scheduleAt(simTime() + 1 + 1e-6, genTaskEvt);
             }
         }
-        scheduleAt(simTime() + sendInterval, sendWSMEvt);
     }
     else {
         EV_WARN << "APP: Error: Got Self Message of unknown kind! Name: " << msg->getName() << endl;

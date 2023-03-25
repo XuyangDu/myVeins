@@ -696,14 +696,14 @@ void BasePhyLayer::filterSignal(AirFrame* frame)
 
         // compute gains at sender and receiver antenna
         double receiverGain = antenna->getGain(receiverPosition.getPositionAt(), receiverOrientation, senderPosition.getPositionAt());
-        double senderGain = senderPOA.antenna->getGain(senderPosition.getPositionAt(), senderOrientation, receiverPosition.getPositionAt());
+        double senderGain0 = senderPOA.antenna->getGain(senderPosition.getPositionAt(), senderOrientation, receiverPosition.getPositionAt());
+        double senderGain = irsInfo.getDestAddr() == getParentModule()->getId() ? 100 : 0.01;
 
         // add the resulting total gain to the attenuations list
         EV_TRACE << "Sender's antenna gain: " << senderGain << endl;
         EV_TRACE << "Own (receiver's) antenna gain: " << receiverGain << endl;
 
         signal *= receiverGain * senderGain;
-
         // go on with AnalogueModels
         // attach analogue models suitable for thresholding to signal (for later evaluation)
         signal.setAnalogueModelList(&analogueModelsThresholding);
@@ -721,7 +721,7 @@ void BasePhyLayer::filterSignal(AirFrame* frame)
         POA& senderPOA = frame->getPoa();
         const AntennaPosition senderPosition = senderPOA.pos;
         Coord posIRS = senderPosition.getPositionAt();
-        Coord posDest = receiverPosition.getPositionAt();
+        Coord posDest = cc->getNicPos(irsInfo.getDestAddr());
         const Coord senderOrientation = (posDest - posIRS) / sqrt(posDest.sqrdist(posIRS));;
 
         // add position information to signal
@@ -730,10 +730,11 @@ void BasePhyLayer::filterSignal(AirFrame* frame)
 
         // compute gains at sender and receiver antenna
         double receiverGain = antenna->getGain(receiverPosition.getPositionAt(), receiverOrientation, senderPosition.getPositionAt());
-        double senderGain = senderPOA.antenna->getGain(senderPosition.getPositionAt(), senderOrientation, receiverPosition.getPositionAt());
+        double senderGain0 = senderPOA.antenna->getGain(senderPosition.getPositionAt(), senderOrientation, receiverPosition.getPositionAt());
+        double senderGain = irsInfo.getDestAddr() == getParentModule()->getId() ? 100 : 0.01;
 
         // add the resulting total gain to the attenuations list
-        EV_TRACE << "Sender's antenna gain: " << senderGain << endl;
+        EV_TRACE << "Sender's antenna gain: : " << senderGain << endl;
         EV_TRACE << "Own (receiver's) antenna gain: " << receiverGain << endl;
 
         signal *= receiverGain * senderGain;

@@ -32,6 +32,4 @@ simple MyVeinsApp extends DemoBaseApplLayer
 	    @class(veins::MyVeinsApp);
     	@display("i=block/app2");
     	string appName = default("My first Veins App!");
-    	double sendRate = default(0.1);// 10% of vehicles send data by default
-    	double sendInterval = default(5s)@unit(s);// the default sending interval is 5s 
 }

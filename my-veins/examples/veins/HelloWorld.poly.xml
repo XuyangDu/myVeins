@@ -41,8 +41,8 @@
 -->
 
 <shapes>
-    <poly id="poly_0" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="-7.5,7.5 -100,7.5 -100,100 -7.5,100 -7.5,7.5"/>
-    <poly id="poly_1" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="-7.5,-7.5 -100,-7.5 -100,-100 -7.5,-100 -7.5,-7.5"/>
-    <poly id="poly_2" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="7.5,-7.5 100,-7.5 100,-100 7.5,-100 7.5,-7.5"/>
-    <poly id="poly_3" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="7.5,7.5 7.5,100 100,100 100,7.5 7.5,7.5"/>
+    <poly id="poly_0" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="10,10 10,190 190,190 190,10 10,10"/>
+    <poly id="poly_1" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="210,10 210,190 390,190 390,10 210,10"/>
+    <poly id="poly_2" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="210,210 210,390 390,390 390,210 210,210"/>
+    <poly id="poly_3" type="building" color="1.00,0.00,0.00" fill="1" layer="4" shape="10,210 10,390 190,390 190,210 10,210"/>
 </shapes>

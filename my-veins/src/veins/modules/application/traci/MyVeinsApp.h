@@ -25,6 +25,8 @@
 #include "veins/veins.h"
 
 #include "veins/modules/application/ieee80211p/DemoBaseApplLayer.h"
+#include "veins/xydu/IRSInfo.h"
+#include "veins/xydu/IRSctrl.h"
 
 using namespace omnetpp;
 
@@ -42,21 +44,34 @@ namespace veins {
 
 class VEINS_API MyVeinsApp : public DemoBaseApplLayer {
 public:
+    enum MyVeinsAppMessageKinds {
+        GEN_TASK_EVT = 2022
+    };
+
+    void setTask(Task task_);
+
     void initialize(int stage) override;
     void finish() override;
 
 
 protected:
-    void onBSM(DemoSafetyMessage* bsm) override;
     void onWSM(BaseFrame1609_4* wsm) override;
-    void onWSA(DemoServiceAdvertisment* wsa) override;
 
     void handleSelfMsg(cMessage* msg) override;
     void handlePositionUpdate(cObject* obj) override;
 
+    int getLastNode(int node);
 
-    double sendRate;
-    double sendInterval;
+    Task task;
+
+    IRSctrl * irsCtrl;
+    BaseConnectionManager* cc;
+
+    int countTask;
+
+    cMessage* genTaskEvt;
+
+    uint32_t hopsCount;
 };
 
 } // namespace veins

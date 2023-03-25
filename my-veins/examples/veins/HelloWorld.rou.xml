@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2021-11-26 16:33:59 by Eclipse SUMO netedit Version 1.11.0
+<!-- generated on 2022-09-15 00:09:08 by Eclipse SUMO netedit Version 1.14.1
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
-    <route edges="gneE0 gneE3" color="yellow" id="route_0"/>
-    <route edges="gneE4 gneE7" color="yellow" id="route_1"/>
-    <route edges="gneE5 gneE6" color="yellow" id="route_2"/>
-    <route edges="gneE1 gneE2" color="yellow" id="route_3"/>
-    <flow id="flow_0" begin="0.00" route="route_0" end="200.00" period="6.00"/>
-    <flow id="flow_1" begin="0.00" route="route_3" end="200.00" period="6.00"/>
-    <flow id="flow_2" begin="0.00" route="route_2" end="200.00" period="6.00"/>
-    <flow id="flow_3" begin="0.00" route="route_1" end="200.00" period="6.00"/>
+    <!-- Vehicles, persons and containers (sorted by depart) -->
+    <flow id="f_0" begin="0.00" departLane="0" from="E4" to="E5" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_1" begin="0.00" departLane="1" from="E4" to="E5" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_10" begin="0.00" departLane="0" from="-E1" to="-E0" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_11" begin="0.00" departLane="1" from="-E1" to="-E0" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_12" begin="0.00" departLane="0" from="-E7" to="-E6" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_13" begin="0.00" departLane="1" from="-E7" to="-E6" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_14" begin="0.00" departLane="0" from="-E9" to="-E8" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_15" begin="0.00" departLane="1" from="-E9" to="-E8" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_16" begin="0.00" departLane="0" from="-E11" to="-E10" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_17" begin="0.00" departLane="1" from="-E11" to="-E10" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_18" begin="0.00" departLane="0" from="E6" to="E7" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_19" begin="0.00" departLane="1" from="E6" to="E7" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_2" begin="0.00" departLane="0" from="E2" to="E3" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_20" begin="0.00" departLane="0" from="E8" to="E9" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_21" begin="0.00" departLane="1" from="E8" to="E9" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_22" begin="0.00" departLane="0" from="E10" to="E11" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_23" begin="0.00" departLane="1" from="E10" to="E11" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_3" begin="0.00" departLane="1" from="E2" to="E3" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_4" begin="0.00" departLane="0" from="E0" to="E1" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_5" begin="0.00" departLane="1" from="E0" to="E1" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_6" begin="0.00" departLane="0" from="-E5" to="-E4" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_7" begin="0.00" departLane="1" from="-E5" to="-E4" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_8" begin="0.00" departLane="0" from="-E3" to="-E2" end="3600.00" vehsPerHour="1440.00"/>
+    <flow id="f_9" begin="0.00" departLane="1" from="-E3" to="-E2" end="3600.00" vehsPerHour="1440.00"/>
 </routes>

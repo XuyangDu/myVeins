@@ -23,6 +23,7 @@
 import org.car2x.veins.nodes.RSU;
 import org.car2x.veins.xydu.IRS;
 import org.car2x.veins.nodes.Scenario;
+import org.car2x.veins.xydu.IRSctrl;
 
 network RSUExampleScenario extends Scenario
 {
@@ -31,7 +32,9 @@ network RSUExampleScenario extends Scenario
 //            @display("p=150,140;i=veins/sign/yellowdiamond;is=vs");
 //        }
     submodules:
-        irs[4]: IRS {
-//            @display("p=150,140;i=veins/sign/yellowdiamond;is=vs");
+        irs[9]: IRS {
+        }
+        ctrl: IRSctrl {
+            @display("p=700,300");
         }
 }
